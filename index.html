@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The System, Not the Task — Reshuffle, applied to the SDLC</title>
+<meta name="description" content="Sangeet Paul Choudary's Reshuffle argues AI's impact is coordination, not automation. The concepts, his examples, and what it means for how we build software.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ===== DAY (default) ===== */
+    --bg:#F1F3F5; --surface:#FFFFFF; --surface-2:#E8ECF0;
+    --ink:#14233A; --ink-2:#2E4256; --muted:#5E6E80;
+    --line:#CFD9E3; --line-2:#E7ECF1;
+    --accent:#2C66D8; --accent-700:#1E4FB0; --accent-soft:#DCE6FA; --accent-mid:#A6C0EF;
+    --teal:#1F4E96; --teal-soft:#DEE7F4; --teal-mid:#AAC0DE; --teal-on:#FFFFFF;
+    --th-bg:#14181D; --th-fg:#FFFFFF; --row-a:#FFFFFF; --row-b:#FAFBFC;
+    --nav-bg:rgba(241,243,245,.85); --footer-bg:#14181D; --plate:#FFFFFF;
+    --chip-bg:#14181D; --chip-fg:#F1F3F5; --grid:rgba(20,24,29,.055);
+    --shadow:0 3px 14px rgba(20,24,29,.08);
+    --display:'Archivo',system-ui,sans-serif;
+    --body:'Source Serif 4',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --wrap:1120px;
+  }
+  [data-theme="dark"]{
+    /* ===== NIGHT ===== */
+    --bg:#0E1217; --surface:#161C23; --surface-2:#1C242D;
+    --ink:#E7ECF2; --ink-2:#B7C2CD; --muted:#7E8B99;
+    --line:#28323D; --line-2:#1B232C;
+    --accent:#5A8DF0; --accent-700:#84A9F6; --accent-soft:#16243F; --accent-mid:#2E4C7E;
+    --teal:#6FA8E0; --teal-soft:#15243A; --teal-mid:#2C476B; --teal-on:#06121F;
+    --th-bg:#222C35; --th-fg:#E7ECF2; --row-a:#161C23; --row-b:#12171D;
+    --nav-bg:rgba(14,18,23,.82); --footer-bg:#0A0E12; --plate:#FFFFFF;
+    --chip-bg:#E7ECF2; --chip-fg:#0E1217; --grid:rgba(255,255,255,.05);
+    --shadow:0 4px 18px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.62; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; transition:background-color .35s ease, color .35s ease;}
+  ::selection{background:var(--accent-soft); color:var(--accent-700);}
+  img,svg{max-width:100%;}
+
+  #progress{position:fixed; top:0; left:0; height:3px; width:0%; background:var(--accent); z-index:100; transition:width .08s linear;}
+
+  /* nav */
+  nav{position:sticky; top:0; z-index:90; background:var(--nav-bg); backdrop-filter:saturate(150%) blur(10px); -webkit-backdrop-filter:saturate(150%) blur(10px); border-bottom:1px solid var(--line);}
+  .nav-in{max-width:var(--wrap); margin:0 auto; padding:12px 24px; display:flex; align-items:center; gap:16px;}
+  .brand{font-family:var(--mono); font-weight:600; font-size:12.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink); white-space:nowrap; display:flex; align-items:center; gap:8px;}
+  .brand .mk{display:inline-grid; place-items:center; width:20px; height:20px; border:1.5px solid var(--accent); color:var(--accent); font-size:11px; border-radius:4px;}
+  .brand b{color:var(--accent); font-weight:700;}
+  .nav-links{display:flex; gap:2px; margin-left:auto; flex-wrap:wrap;}
+  .nav-links a{font-family:var(--mono); font-size:11.5px; letter-spacing:.04em; text-decoration:none; color:var(--muted); padding:6px 9px; border-radius:6px;}
+  .nav-links a:hover{color:var(--ink); background:var(--surface-2);}
+  .nav-links a.active{color:var(--accent); background:var(--accent-soft);}
+  .theme-toggle{margin-left:10px; display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:6px 12px; cursor:pointer; transition:background .2s,border-color .2s,color .2s;}
+  .theme-toggle:hover{border-color:var(--accent-mid); color:var(--ink);}
+  .tt-ico{width:13px; text-align:center; color:var(--accent);}
+  .tt-ico::before{content:"\2600";}
+  [data-theme="dark"] .tt-ico::before{content:"\263E";}
+
+  .wrap{max-width:var(--wrap); margin:0 auto; padding:0 24px;}
+  section{padding:78px 0; border-bottom:1px solid var(--line-2);}
+  section:last-of-type{border-bottom:none;}
+
+  .eyebrow{font-family:var(--mono); font-size:12px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); display:flex; align-items:center; gap:9px; margin:0 0 16px;}
+  .eyebrow::before{content:""; width:8px; height:8px; background:var(--accent); display:inline-block; flex:none;}
+  .eyebrow.teal{color:var(--teal);} .eyebrow.teal::before{background:var(--teal);}
+  .eyebrow.muted{color:var(--muted);} .eyebrow.muted::before{background:var(--muted);}
+
+  h1,h2,h3,h4{font-family:var(--display); color:var(--ink); line-height:1.08; margin:0;}
+  h2{font-size:clamp(28px,4.4vw,46px); font-weight:800; letter-spacing:-.015em; margin-bottom:12px;}
+  h3{font-size:clamp(20px,2.5vw,26px); font-weight:800; letter-spacing:-.01em; margin:46px 0 8px;}
+  h4{font-size:18px; font-weight:700; margin:0 0 6px;}
+  .lede{font-size:clamp(19px,2.1vw,22px); color:var(--ink-2); max-width:62ch; margin:0 0 10px; font-family:var(--body);}
+  p{margin:0 0 18px; max-width:70ch;}
+  a.link{color:var(--accent-700); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1.5px;}
+  strong{font-weight:600; color:var(--ink);}
+
+  /* hero */
+  .hero{padding:74px 0 60px; border-bottom:1px solid var(--line-2); background-image:radial-gradient(var(--grid) 1px, transparent 1px); background-size:22px 22px;}
+  .hero .code{font-family:var(--mono); font-size:12px; letter-spacing:.13em; color:var(--muted); text-transform:uppercase; margin-bottom:24px; display:flex; gap:0; flex-wrap:wrap;}
+  .hero .code span{padding:0 14px; border-right:1px solid var(--line);}
+  .hero .code span:first-child{padding-left:0; color:var(--accent); font-weight:600;}
+  .hero .code span:last-child{border-right:none;}
+  .hero h1{font-size:clamp(44px,8.6vw,94px); font-weight:900; letter-spacing:-.03em; line-height:.96; margin:0 0 26px;}
+  .hero h1 .em{color:var(--accent); font-style:italic; font-weight:800;}
+  .hero .sub{font-size:clamp(18px,2.2vw,23px); color:var(--ink-2); max-width:60ch; margin:0 0 28px;}
+  .hero .meta{font-family:var(--mono); font-size:12px; color:var(--muted); letter-spacing:.02em;}
+
+  .strip{margin:30px 0 4px; padding:22px; background:var(--surface); border:1px solid var(--line); border-radius:12px;}
+  .strip-lab{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:13px;}
+  .strip-row{display:flex; gap:7px; flex-wrap:wrap; align-items:center;}
+  .blk{font-family:var(--display); font-weight:700; font-size:13px; color:var(--chip-fg); background:var(--chip-bg); padding:11px 14px; border-radius:7px; opacity:0; transform:translateY(8px); transition:opacity .5s ease, transform .5s ease;}
+  .blk.j2{background:var(--teal); color:var(--teal-on);} .blk.mut{background:var(--surface-2); color:var(--muted);}
+  .arrow{font-family:var(--mono); color:var(--accent); font-weight:600; opacity:0; transition:opacity .5s ease .4s;}
+  .reveal-blk.in .blk{opacity:1; transform:none;} .reveal-blk.in .arrow{opacity:1;}
+  .reveal-blk .blk:nth-child(2){transition-delay:.06s} .reveal-blk .blk:nth-child(3){transition-delay:.12s}
+  .reveal-blk .blk:nth-child(4){transition-delay:.18s} .reveal-blk .blk:nth-child(5){transition-delay:.24s} .reveal-blk .blk:nth-child(6){transition-delay:.30s}
+
+  /* figures = matted plates (white in both themes) */
+  figure{margin:30px 0; background:var(--plate); border:1px solid var(--line); border-radius:12px; padding:20px; overflow:hidden; box-shadow:var(--shadow); transition:border-color .35s ease;}
+  figure svg{display:block; width:100%; height:auto;}
+  figcaption{font-family:var(--mono); font-size:11.5px; color:#5C6B79; letter-spacing:.02em; margin-top:14px; padding-top:12px; border-top:1px solid #E7ECF1; line-height:1.5;}
+  figcaption b{color:#33424E; font-weight:600;}
+
+  blockquote{margin:34px 0; padding:6px 0 6px 26px; border-left:4px solid var(--accent);}
+  blockquote p{font-size:clamp(20px,2.6vw,27px); font-style:italic; color:var(--ink); line-height:1.36; margin:0 0 10px; max-width:none;}
+  blockquote cite{font-family:var(--mono); font-style:normal; font-size:12px; letter-spacing:.04em; color:var(--muted);}
+
+  .compare{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:28px 0;}
+  .pane{border-radius:12px; padding:24px; border:1px solid var(--line);}
+  .pane.bad{background:var(--surface-2);}
+  .pane.good{background:var(--accent-soft); border-color:var(--accent-mid);}
+  .pane .tag{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;}
+  .pane.bad .tag{color:var(--muted);} .pane.good .tag{color:var(--accent);}
+  .pane h4{font-size:21px; margin-bottom:10px; color:var(--ink);}
+  .pane p{font-size:16.5px; margin:0; color:var(--ink-2);}
+
+  .grid{display:grid; gap:18px; margin:28px 0;}
+  .grid.g2{grid-template-columns:1fr 1fr;}
+  .grid.g4{grid-template-columns:repeat(4,1fr);}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:22px;}
+  .card .lab{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:10px;}
+  .card.t .lab{color:var(--teal);}
+  .card h4{font-size:18.5px; margin-bottom:8px; color:var(--ink);}
+  .card p{font-size:15.5px; line-height:1.55; color:var(--ink-2); margin:0;}
+  .card p + p{margin-top:10px;}
+
+  .ex{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:26px; margin:24px 0;}
+  .ex .lab{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:8px;}
+  .ex h4{font-size:22px; margin-bottom:12px; color:var(--ink);}
+  .ex .two{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  .ex .two > div{padding:16px; border-radius:10px;}
+  .ex .lose{background:var(--surface-2);}
+  .ex .win{background:var(--teal-soft);}
+  .ex .two h5{font-family:var(--display); font-size:15px; margin:0 0 6px; color:var(--ink);}
+  .ex .two p{font-size:15px; margin:0; color:var(--ink-2);}
+  .ex .verdict{margin-top:16px; font-size:16.5px; color:var(--ink);}
+  .ex .verdict b{color:var(--accent-700);}
+
+  .tablewrap{overflow-x:auto; margin:28px 0; border:1px solid var(--line); border-radius:12px;}
+  table{border-collapse:collapse; width:100%; min-width:760px; font-size:15px;}
+  thead th{background:var(--th-bg); color:var(--th-fg); font-family:var(--display); font-weight:700; font-size:13px; text-align:left; padding:13px 16px;}
+  tbody td{padding:14px 16px; border-top:1px solid var(--line-2); color:var(--ink-2); vertical-align:top; line-height:1.5;}
+  tbody tr:nth-child(even){background:var(--row-a);}
+  tbody tr:nth-child(odd){background:var(--row-b);}
+  td .ph{font-family:var(--display); font-weight:700; color:var(--ink); display:block; margin-bottom:2px;}
+  td .new{color:var(--teal); font-weight:600;}
+
+  ul.clean{list-style:none; padding:0; margin:20px 0; max-width:72ch;}
+  ul.clean li{position:relative; padding-left:30px; margin-bottom:14px; line-height:1.55;}
+  ul.clean li::before{content:""; position:absolute; left:4px; top:11px; width:8px; height:8px; background:var(--accent);}
+  ul.clean.teal li::before{background:var(--teal);}
+  ul.clean li b{color:var(--ink);}
+
+  ol.play{list-style:none; counter-reset:p; padding:0; margin:24px 0; display:grid; gap:14px;}
+  ol.play li{counter-increment:p; position:relative; background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:20px 22px 20px 68px;}
+  ol.play li::before{content:counter(p,decimal-leading-zero); position:absolute; left:22px; top:19px; font-family:var(--mono); font-weight:600; font-size:15px; color:var(--accent);}
+  ol.play li h4{margin-bottom:5px; font-size:18px; color:var(--ink);}
+  ol.play li p{font-size:15.5px; margin:0; color:var(--ink-2);}
+
+  .note{background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:24px; margin:28px 0;}
+  .note .lab{font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:10px;}
+  .note p{margin:0 0 12px; color:var(--ink-2);} .note p:last-child{margin:0;}
+
+  footer{padding:60px 0 80px; background:var(--footer-bg); color:#C9D6E2; border-top:1px solid var(--line);}
+  footer .eyebrow{color:var(--accent);} footer .eyebrow::before{background:var(--accent);}
+  footer h3{color:#fff; margin:0 0 16px;}
+  footer p{color:#A9BBCB; font-size:15.5px; max-width:76ch;}
+  footer a{color:#fff; text-decoration:underline; text-underline-offset:3px;}
+  footer .src{font-family:var(--mono); font-size:13px; line-height:2; color:#C9D6E2;}
+  footer .fine{font-size:13px; color:#7E93A6; margin-top:24px; font-family:var(--mono); line-height:1.7;}
+
+  .card,.note,.pane,.ex,.strip,figure,table,ol.play li{transition:background-color .35s ease, border-color .35s ease;}
+
+  @media (max-width:820px){
+    body{font-size:17px;}
+    .compare,.ex .two,.grid.g2,.grid.g4{grid-template-columns:1fr;}
+    .nav-links{display:none;}
+    .theme-toggle{margin-left:auto;}
+    section{padding:54px 0;}
+    ol.play li{padding:18px 18px 18px 58px;} ol.play li::before{left:18px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{scroll-behavior:auto !important;}
+    .blk,.arrow,.reveal{transition:none !important; opacity:1 !important; transform:none !important;}
+  }
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1; transform:none;}
+</style>
+<meta name="color-scheme" content="light dark">
+<script>(function(){try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";}document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","light");}})();</script>
+</head>
+<body>
+<div id="progress"></div>
+<nav>
+  <div class="nav-in">
+    <div class="brand"><span class="mk">R</span>Reshuffle <b>//</b> SDLC</div>
+    <div class="nav-links">
+      <a href="#summary">Summary</a>
+      <a href="#reframe">Reframe</a>
+      <a href="#concepts">Concepts</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#sdlc">SDLC</a>
+      <a href="#playbook">Playbook</a>
+      <a href="#sources">Sources</a>
+    </div>
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle day or night mode" aria-pressed="false"><span class="tt-ico" aria-hidden="true"></span><span class="tt-label">Day</span></button>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="code"><span>FIG_000</span><span>Reshuffle v1.0</span><span>2026</span><span>Internal field note</span></div>
+    <h1>The system,<br>not the <span class="em">task</span>.</h1>
+    <p class="sub">Sangeet Paul Choudary's <em>Reshuffle</em> argues that AI's real economic impact is not automation — it's coordination. This is his argument, the examples he uses to make it, and what it means for how we build software.</p>
+    <div class="strip reveal-blk">
+      <div class="strip-lab">The mechanic in one line — a job is a bundle of tasks that unbundles, then rebundles</div>
+      <div class="strip-row">
+        <span class="blk mut">Draft</span>
+        <span class="blk mut">Look&nbsp;up</span>
+        <span class="blk mut">Classify</span>
+        <span class="arrow">&rarr;</span>
+        <span class="blk j2">Human&nbsp;judgment</span>
+        <span class="blk j2">AI&nbsp;orchestration</span>
+        <span class="blk j2">Risk&nbsp;&amp;&nbsp;verification</span>
+      </div>
+    </div>
+    <p class="meta" style="margin-top:22px;">A synthesis of <em>Reshuffle: Who Wins When AI Restacks the Knowledge Economy</em> (2025) &mdash; mapped onto the software development lifecycle.</p>
+  </div>
+</header>
+
+<section id="summary">
+  <div class="wrap reveal">
+    <div class="eyebrow muted">00 · The short version</div>
+    <h2>If you read nothing else</h2>
+    <p class="lede">Most teams adopt AI by asking what it can automate. Choudary's claim is that this is the wrong question, and that the teams who only ask it will optimise themselves into the part of the system that is about to lose its value.</p>
+    <ul class="clean">
+      <li><b>The reframe.</b> AI's leverage is not doing existing tasks faster; it is letting parts of a system coordinate that never could before. Automation is the first-order effect; the reshuffle of who holds value is the real one.</li>
+      <li><b>The mechanic.</b> When AI removes a constraint, the system built around it (a job, a team, a value chain) <em>unbundles</em> into components and <em>rebundles</em> around whatever is now scarce.</li>
+      <li><b>The rule.</b> Scarcities erode; constraints persist and move. Value migrates to whoever sits at the new constraint — usually upstream (defining the work) and at verification (judging it).</li>
+      <li><b>For the SDLC.</b> As the cost of producing code collapses, value leaves implementation and moves to <b>specification, evaluation, orchestration and verification</b>. The pipeline reshuffles from a relay race into an orchestrated system.</li>
+      <li><b>The trap.</b> Bolting AI onto today's process as a tool makes you faster at the old game. Using it as the <em>engine</em> changes the game — and that is where advantage is created.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="reframe">
+  <div class="wrap reveal">
+    <div class="eyebrow">01 · The reframe</div>
+    <h2>Coordination, not automation</h2>
+    <p class="lede">The central argument of <em>Reshuffle</em> is that we are misreading AI the same way the world misread the shipping container in 1956 — as a faster way to do the work we already do.</p>
+    <p>Choudary calls the automation framing the <strong>&ldquo;intelligence distraction.&rdquo;</strong> Asking how clever AI is, or what tasks it can take over, keeps attention on first-order effects: cheaper, faster, fewer people. His claim is that the deeper impact comes from how AI <strong>restructures the system around a task</strong> — letting domains, teams and tools coordinate where they previously couldn't, and in doing so reshuffling where value and power sit.</p>
+    <figure><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 430" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#5E7C97"/>
+</marker>
+<marker id="arrowS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#2C66D8"/>
+</marker>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+  <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#11263A" flood-opacity="0.10"/>
+</filter>
+</defs>
+<rect width="1000" height="430" fill="#FFFFFF"/>
+<text x="40" y="46" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#2C66D8" text-anchor="start" letter-spacing="1.5">THE REFRAME</text><text x="40" y="80" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="30" font-weight="800" fill="#11263A" text-anchor="start">Two ways to read AI</text><rect x="40" y="110" width="440" height="210" rx="14" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.5"/><text x="66" y="148" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#6B8198" text-anchor="start" letter-spacing="1.5">THE AUTOMATION READ</text><text x="66" y="184" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="23" font-weight="700" fill="#2A4258" text-anchor="start">Speed up the task</text><text x="66" y="218" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="15" font-weight="400" fill="#2A4258" text-anchor="start">Faster, cheaper, better</text><text x="66" y="244" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="15" font-weight="400" fill="#2A4258" text-anchor="start">Same work — fewer people</text><text x="66" y="270" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="15" font-weight="400" fill="#2A4258" text-anchor="start">A productivity tool</text><rect x="66" y="276" width="200" height="26" rx="13" fill="#FFFFFF" stroke="#DCE4EB" stroke-width="1.4"/><text x="166" y="293" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="10.5" font-weight="600" fill="#6B8198" text-anchor="middle" letter-spacing="0.5">FIRST-ORDER · VISIBLE NOW</text><rect x="520" y="110" width="440" height="210" rx="14" fill="#DCE6FA" stroke="#A6C0EF" stroke-width="1.6" filter="url(#soft)"/><text x="546" y="148" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#2C66D8" text-anchor="start" letter-spacing="1.5">THE COORDINATION READ</text><text x="546" y="184" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="23" font-weight="800" fill="#11263A" text-anchor="start">Restructure the system</text><text x="546" y="218" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="15" font-weight="400" fill="#11263A" text-anchor="start">Domains that couldn’t talk now coordinate</text><text x="546" y="244" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="15" font-weight="400" fill="#11263A" text-anchor="start">Work unbundles, then rebundles</text><text x="546" y="270" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="15" font-weight="400" fill="#11263A" text-anchor="start">The basis of competition shifts</text><rect x="546" y="276" width="210" height="26" rx="13" fill="#FFFFFF" stroke="#A6C0EF" stroke-width="1.4"/><text x="651" y="293" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="10.5" font-weight="600" fill="#2C66D8" text-anchor="middle" letter-spacing="0.5">SYSTEMIC · SHOWS UP LATER</text><circle cx="500" cy="215" r="22" fill="#11263A"/><text x="500" y="221" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="17" font-weight="700" fill="#FFFFFF" text-anchor="middle">vs</text><line x1="40" y1="354" x2="960" y2="354" stroke="#CBD7E0" stroke-width="1" stroke-linecap="round"/><text x="40" y="384" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="17" font-weight="500" fill="#11263A" text-anchor="start" font-style="italic">“AI is not a tool of automation. It is a mechanism for coordination.”</text><text x="40" y="406" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="12.5" font-weight="600" fill="#6B8198" text-anchor="start">— Sangeet Paul Choudary, Reshuffle</text>
+</svg><figcaption><b>Fig 1 — Two readings of AI.</b> The automation read is visible immediately and mostly priced in. The coordination read is systemic and shows up later — which is exactly why it is underestimated.</figcaption></figure>
+    <blockquote><p>&ldquo;AI is not a tool of automation. It is a mechanism for coordination.&rdquo;</p><cite>— Sangeet Paul Choudary, Reshuffle</cite></blockquote>
+  </div>
+</section>
+
+<section id="concepts">
+  <div class="wrap reveal">
+    <div class="eyebrow">02 · The concepts</div>
+    <h2>Four ideas that do the work</h2>
+    <p class="lede">The book rests on a small set of interlocking ideas. Understand these four and the rest — including the software mapping — follows.</p>
+
+    <h3>2.1&nbsp;&nbsp;Systems organise around constraints</h3>
+    <p>A job, a firm, an industry — each exists to manage some constraint. Choudary names three kinds: <strong>scarcity</strong> (rare expertise), <strong>risk</strong> (liability and uncertainty), and <strong>coordination</strong> (aligning fragmented actors). Value accrues to whoever resolves the binding constraint. When AI removes one — makes expertise abundant, execution cheap, access easy — the value sitting on that constraint doesn't evaporate. It <strong>migrates</strong> to the next constraint in the system. Scarcities erode; constraints persist and move.</p>
+    <figure><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 440" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#5E7C97"/>
+</marker>
+<marker id="arrowS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#2C66D8"/>
+</marker>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+  <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#11263A" flood-opacity="0.10"/>
+</filter>
+</defs>
+<rect width="1000" height="440" fill="#FFFFFF"/>
+<text x="40" y="46" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#2C66D8" text-anchor="start" letter-spacing="1.5">WHERE VALUE LIVES NOW</text><text x="40" y="80" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="30" font-weight="800" fill="#11263A" text-anchor="start">Scarcities erode. Constraints persist.</text><text x="40" y="118" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#6B8198" text-anchor="start">Systems organise around managing a constraint. Three kinds:</text><rect x="40" y="132" width="150" height="52" rx="10" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.4"/><text x="58" y="156" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="14" font-weight="800" fill="#11263A" text-anchor="start">SCARCITY</text><text x="58" y="174" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">rare expertise</text><rect x="208" y="132" width="210" height="52" rx="10" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.4"/><text x="226" y="156" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="14" font-weight="800" fill="#11263A" text-anchor="start">RISK</text><text x="226" y="174" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">liability &amp; uncertainty</text><rect x="436" y="132" width="235" height="52" rx="10" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.4"/><text x="454" y="156" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="14" font-weight="800" fill="#11263A" text-anchor="start">COORDINATION</text><text x="454" y="174" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">fragmented actors</text><text x="40" y="244" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13.5" font-weight="600" fill="#2A4258" text-anchor="start">When AI removes the scarcity a business sits on …</text><rect x="40" y="260" width="250" height="86" rx="12" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.5"/><text x="62" y="288" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#6B8198" text-anchor="start" letter-spacing="1.5">OLD POSITION</text><text x="62" y="314" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="18" font-weight="700" fill="#6B8198" text-anchor="start">Owns a scarcity</text><line x1="58" y1="328" x2="272" y2="300" stroke="#2C66D8" stroke-width="2.5" stroke-linecap="round"/><text x="62" y="334" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="start">the scarcity stops being scarce</text><line x1="300" y1="303" x2="470" y2="303" stroke="#2C66D8" stroke-width="3" marker-end="url(#arrowS)"  stroke-linecap="round"/><text x="385" y="290" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="12.5" font-weight="700" fill="#2C66D8" text-anchor="middle">value migrates</text><rect x="480" y="260" width="250" height="86" rx="12" fill="#DEE7F4" stroke="#1F4E96" stroke-width="1.8" filter="url(#soft)"/><text x="502" y="288" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#1F4E96" text-anchor="start" letter-spacing="1.5">NEW POSITION</text><text x="502" y="314" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="18" font-weight="800" fill="#11263A" text-anchor="start">Owns a constraint</text><text x="502" y="334" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">governs the new abundance</text><rect x="752" y="260" width="208" height="86" rx="12" fill="#FFFFFF" stroke="#CBD7E0" stroke-width="1.4"/><text x="764" y="284" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="600" fill="#2A4258" text-anchor="start">Kodak owned a scarcity.</text><text x="764" y="304" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="600" fill="#2A4258" text-anchor="start">Shutterstock owned</text><text x="764" y="322" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="600" fill="#2A4258" text-anchor="start">a constraint — and kept it.</text><text x="40" y="388" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#11263A" text-anchor="start" font-style="italic">“The firms that thrive reposition to manage the new constraints introduced by abundance.” — Choudary</text>
+</svg><figcaption><b>Fig 2 — Follow the constraint.</b> The strategic question is not &ldquo;what new skill should we acquire?&rdquo; but &ldquo;where is the new constraint, and what would it take to reposition around it?&rdquo;</figcaption></figure>
+    <blockquote><p>&ldquo;When AI removes a scarcity, the firms that thrive aren't the ones that double down on what they used to do best. They reposition to manage the new constraints introduced by abundance.&rdquo;</p><cite>— Sangeet Paul Choudary, Reshuffle</cite></blockquote>
+
+    <h3>2.2&nbsp;&nbsp;Unbundling and rebundling — the universal mechanic</h3>
+    <p>This is the engine of the whole book. A job is really a <strong>bundle of tasks</strong> — draft, look up, classify, judge, own the relationship, verify — held together because it was historically cheaper to keep them in one person than to split them. AI unbundles that bundle into components that can each be performed, audited or replaced separately. Some commoditise first (and, Choudary notes, <em>not the ones you'd guess</em>). The job doesn't disappear; it <strong>rebundles</strong> around the constraints that remain — judgment, orchestration, and verification.</p>
+    <figure><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#5E7C97"/>
+</marker>
+<marker id="arrowS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#2C66D8"/>
+</marker>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+  <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#11263A" flood-opacity="0.10"/>
+</filter>
+</defs>
+<rect width="1000" height="560" fill="#FFFFFF"/>
+<text x="40" y="46" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#2C66D8" text-anchor="start" letter-spacing="1.5">THE UNIVERSAL MECHANIC</text><text x="40" y="80" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="30" font-weight="800" fill="#11263A" text-anchor="start">Unbundle → rebundle</text><text x="40" y="108" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#6B8198" text-anchor="start">A job — a bundle of tasks held together because it was cheaper to keep them in one person</text><rect x="40" y="120" width="920" height="64" rx="10" fill="#11263A"/><text x="116.66666666666667" y="157" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">Draft</text><line x1="193.33333333333334" y1="126" x2="193.33333333333334" y2="178" stroke="#3C566E" stroke-width="1.2" stroke-linecap="round"/><text x="270" y="157" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">Look up</text><line x1="346.6666666666667" y1="126" x2="346.6666666666667" y2="178" stroke="#3C566E" stroke-width="1.2" stroke-linecap="round"/><text x="423.33333333333337" y="157" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">Classify</text><line x1="500" y1="126" x2="500" y2="178" stroke="#3C566E" stroke-width="1.2" stroke-linecap="round"/><text x="576.6666666666666" y="157" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">Judge</text><line x1="653.3333333333334" y1="126" x2="653.3333333333334" y2="178" stroke="#3C566E" stroke-width="1.2" stroke-linecap="round"/><text x="730" y="149" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">Own the</text><text x="730" y="165" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">relationship</text><line x1="806.6666666666667" y1="126" x2="806.6666666666667" y2="178" stroke="#3C566E" stroke-width="1.2" stroke-linecap="round"/><text x="883.3333333333334" y="157" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">Verify</text><line x1="500" y1="192" x2="500" y2="228" stroke="#2C66D8" stroke-width="2.5" marker-end="url(#arrowS)"  stroke-linecap="round"/><text x="520" y="218" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="13" font-weight="600" fill="#2C66D8" text-anchor="start">AI unbundles the tasks</text><rect x="40" y="242" width="141.66666666666666" height="58" rx="8" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.5"/><text x="110.83333333333333" y="275" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#6B8198" text-anchor="middle">Draft</text><line x1="50" y1="291" x2="171.66666666666666" y2="291" stroke="#2C66D8" stroke-width="2" stroke-linecap="round"/><rect x="195.66666666666666" y="242" width="141.66666666666666" height="58" rx="8" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.5"/><text x="266.5" y="275" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#6B8198" text-anchor="middle">Look up</text><line x1="205.66666666666666" y1="291" x2="327.3333333333333" y2="291" stroke="#2C66D8" stroke-width="2" stroke-linecap="round"/><rect x="351.3333333333333" y="242" width="141.66666666666666" height="58" rx="8" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.5"/><text x="422.16666666666663" y="275" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#6B8198" text-anchor="middle">Classify</text><line x1="361.3333333333333" y1="291" x2="483" y2="291" stroke="#2C66D8" stroke-width="2" stroke-linecap="round"/><rect x="507" y="242" width="141.66666666666666" height="58" rx="8" fill="#FFFFFF" stroke="#5E7C97" stroke-width="1.5"/><text x="577.8333333333334" y="275" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#11263A" text-anchor="middle">Judge</text><rect x="662.6666666666666" y="242" width="141.66666666666666" height="58" rx="8" fill="#FFFFFF" stroke="#5E7C97" stroke-width="1.5"/><text x="733.5" y="268" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#11263A" text-anchor="middle">Own the</text><text x="733.5" y="282" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#11263A" text-anchor="middle">relationship</text><rect x="818.3333333333333" y="242" width="141.66666666666666" height="58" rx="8" fill="#FFFFFF" stroke="#5E7C97" stroke-width="1.5"/><text x="889.1666666666666" y="275" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="600" fill="#11263A" text-anchor="middle">Verify</text><text x="40" y="322" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="400" fill="#6B8198" text-anchor="start">Some commoditize first (blue underline) — and they’re not the ones you’d guess.</text><line x1="500" y1="334" x2="500" y2="370" stroke="#2C66D8" stroke-width="2.5" marker-end="url(#arrowS)"  stroke-linecap="round"/><text x="520" y="360" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="13" font-weight="600" fill="#2C66D8" text-anchor="start">Rebundles around new constraints</text><rect x="40" y="384" width="292" height="70" rx="10" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.6"/><text x="58" y="414" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="16.5" font-weight="800" fill="#11263A" text-anchor="start">Human judgment</text><text x="58" y="436" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#2A4258" text-anchor="start">where the call is genuinely yours</text><rect x="354" y="384" width="292" height="70" rx="10" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.6"/><text x="372" y="414" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="16.5" font-weight="800" fill="#11263A" text-anchor="start">AI orchestration</text><text x="372" y="436" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#2A4258" text-anchor="start">a role that didn’t exist 5 years ago</text><rect x="668" y="384" width="292" height="70" rx="10" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.6"/><text x="686" y="414" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="16.5" font-weight="800" fill="#11263A" text-anchor="start">Risk &amp; verification</text><text x="686" y="436" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#2A4258" text-anchor="start">because AI can’t audit itself</text><text x="40" y="484" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13.5" font-weight="500" fill="#2A4258" text-anchor="start">The job didn’t disappear — it re-formed around what stays scarce. The same dynamic runs at every level: job → organisation → value chain.</text>
+</svg><figcaption><b>Fig 3 — The universal mechanic.</b> The same unbundle&ndash;rebundle dynamic runs at every level: the job, then the organisation (which functions centralise vs. disperse), then the value chain (which firms become orchestrators vs. commoditised suppliers).</figcaption></figure>
+    <div class="note">
+      <div class="lab">A useful distinction</div>
+      <p style="margin:0;"><strong>Economic value vs. contextual value.</strong> Economic value comes from scarcity, and AI collapses it wherever output is &ldquo;good enough&rdquo; — eroding the skill premium experts once charged. What survives is <strong>contextual</strong> value: judgment tied to a specific situation, accountability for an outcome, and the trust to own a decision. Work that is pure economic-value-from-scarcity is most exposed; work rich in context is where people rebundle.</p>
+    </div>
+
+    <h3>2.3&nbsp;&nbsp;Coordination without consensus</h3>
+    <p>Here is the part with no historical precedent. The container only worked once every port, carrier and trucker agreed on one standard — ISO dimensions, a single bill of lading. The format had to be settled <em>before</em> anything could move. AI doesn't need that. It learns each silo's language and translates between them without forcing anyone to standardise: support keeps writing tickets, engineering keeps writing bug reports, legal keeps writing briefs, and AI moves meaning across. <strong>Translation cost falls to near zero, so coordination can start before anyone agrees.</strong></p>
+    <figure><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 460" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#5E7C97"/>
+</marker>
+<marker id="arrowS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#2C66D8"/>
+</marker>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+  <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#11263A" flood-opacity="0.10"/>
+</filter>
+</defs>
+<rect width="1000" height="460" fill="#FFFFFF"/>
+<text x="40" y="46" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#2C66D8" text-anchor="start" letter-spacing="1.5">WHAT IS GENUINELY NEW</text><text x="40" y="80" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="30" font-weight="800" fill="#11263A" text-anchor="start">Coordination without consensus</text><rect x="40" y="108" width="440" height="300" rx="14" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.5"/><text x="64" y="144" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#2C66D8" text-anchor="start" letter-spacing="1.5">THE CONTAINER — THEN</text><text x="64" y="172" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="19" font-weight="700" fill="#11263A" text-anchor="start">Everyone must agree first</text><rect x="64" y="204" width="120" height="32" rx="8" fill="#FFFFFF" stroke="#9DB4C6" stroke-width="1.4"/><text x="124" y="225" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13.5" font-weight="600" fill="#2A4258" text-anchor="middle">Ship</text><line x1="188" y1="220" x2="272" y2="266" stroke="#5E7C97" stroke-width="1.6" marker-end="url(#arrow)" stroke-linecap="round"/><rect x="64" y="246" width="120" height="32" rx="8" fill="#FFFFFF" stroke="#9DB4C6" stroke-width="1.4"/><text x="124" y="267" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13.5" font-weight="600" fill="#2A4258" text-anchor="middle">Truck</text><line x1="188" y1="262" x2="272" y2="266" stroke="#5E7C97" stroke-width="1.6" marker-end="url(#arrow)" stroke-linecap="round"/><rect x="64" y="288" width="120" height="32" rx="8" fill="#FFFFFF" stroke="#9DB4C6" stroke-width="1.4"/><text x="124" y="309" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13.5" font-weight="600" fill="#2A4258" text-anchor="middle">Rail</text><line x1="188" y1="304" x2="272" y2="266" stroke="#5E7C97" stroke-width="1.6" marker-end="url(#arrow)" stroke-linecap="round"/><rect x="272" y="234" width="204" height="64" rx="10" fill="#11263A"/><text x="374" y="258" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="13" font-weight="800" fill="#FFFFFF" text-anchor="middle">AGREE FIRST</text><text x="374" y="278" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="10" font-weight="400" fill="#9DB4C6" text-anchor="middle">ISO 1161 · one contract</text><text x="64" y="382" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#6B8198" text-anchor="start">The format had to be settled before</text><text x="64" y="398" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#6B8198" text-anchor="start">anyone could move.</text><rect x="520" y="108" width="440" height="300" rx="14" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.6" filter="url(#soft)"/><text x="544" y="144" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#1F4E96" text-anchor="start" letter-spacing="1.5">AI — NOW</text><text x="544" y="172" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="18" font-weight="800" fill="#11263A" text-anchor="start">Each silo keeps its own language</text><rect x="544" y="200" width="150" height="32" rx="8" fill="#FFFFFF" stroke="#9DB4C6" stroke-width="1.4"/><text x="619" y="221" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12" font-weight="600" fill="#2A4258" text-anchor="middle">Support tickets</text><rect x="544" y="240" width="150" height="32" rx="8" fill="#FFFFFF" stroke="#9DB4C6" stroke-width="1.4"/><text x="619" y="261" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12" font-weight="600" fill="#2A4258" text-anchor="middle">Eng bug-tracker</text><rect x="544" y="280" width="150" height="32" rx="8" fill="#FFFFFF" stroke="#9DB4C6" stroke-width="1.4"/><text x="619" y="301" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12" font-weight="600" fill="#2A4258" text-anchor="middle">Legal brief</text><rect x="770" y="200" width="150" height="112" rx="10" fill="#1F4E96"/><text x="845" y="250" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="20" font-weight="800" fill="#FFFFFF" text-anchor="middle">AI</text><text x="845" y="274" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="12" font-weight="400" fill="#DEE7F4" text-anchor="middle">translates</text><line x1="696" y1="216" x2="768" y2="256" stroke="#1F4E96" stroke-width="1.6" marker-end="url(#arrow)" stroke-linecap="round"/><line x1="696" y1="256" x2="768" y2="256" stroke="#1F4E96" stroke-width="1.6" marker-end="url(#arrow)" stroke-linecap="round"/><line x1="696" y1="296" x2="768" y2="256" stroke="#1F4E96" stroke-width="1.6" marker-end="url(#arrow)" stroke-linecap="round"/><text x="544" y="382" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#2A4258" text-anchor="start">AI learns each language and translates</text><text x="544" y="398" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#2A4258" text-anchor="start">between them — no standard required.</text><text x="40" y="446" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="700" fill="#11263A" text-anchor="start">Translation cost → near zero. Coordination starts before anyone agrees.</text>
+</svg><figcaption><b>Fig 4 — Coordination without consensus.</b> The real impact won't show up as cost savings on existing tasks. It shows up in domains that have talked past each other for years suddenly working together.</figcaption></figure>
+
+    <h3>2.4&nbsp;&nbsp;AI as the engine, not a tool</h3>
+    <p>Most companies use AI as a <strong>tool</strong>: they bolt it onto an existing architecture to do the current job better. The prize goes to those who use it as the <strong>engine</strong> — who let the system reorganise around what AI makes possible. The difference decides whether you compete harder at the old game or change the rules of the game entirely.</p>
+    <figure><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 460" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#5E7C97"/>
+</marker>
+<marker id="arrowS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#2C66D8"/>
+</marker>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+  <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#11263A" flood-opacity="0.10"/>
+</filter>
+</defs>
+<rect width="1000" height="460" fill="#FFFFFF"/>
+<text x="40" y="46" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#2C66D8" text-anchor="start" letter-spacing="1.5">THE AI-NATIVE COMPANY</text><text x="40" y="80" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="30" font-weight="800" fill="#11263A" text-anchor="start">AI as a tool vs AI as the engine</text><rect x="40" y="108" width="440" height="270" rx="14" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.5"/><text x="64" y="144" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#6B8198" text-anchor="start" letter-spacing="1.5">AS A TOOL — INSTAGRAM</text><circle cx="190" cy="258" r="62" fill="#FFFFFF" stroke="#5E7C97" stroke-width="1.8"/><text x="190" y="252" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="14" font-weight="700" fill="#11263A" text-anchor="middle">Social graph</text><text x="190" y="272" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11" font-weight="400" fill="#6B8198" text-anchor="middle">who you follow</text><rect x="290" y="226" width="150" height="64" rx="10" fill="#FFFFFF" stroke="#9DB4C6" stroke-width="1.5"/><text x="365" y="254" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="14" font-weight="700" fill="#2A4258" text-anchor="middle">AI ranks</text><text x="365" y="274" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11" font-weight="400" fill="#6B8198" text-anchor="middle">the feed</text><line x1="252" y1="258" x2="288" y2="258" stroke="#5E7C97" stroke-width="1.6" marker-end="url(#arrow)" stroke-linecap="round"/><text x="64" y="348" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#6B8198" text-anchor="start">The graph decides; AI just ranks smarter.</text><text x="64" y="366" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#6B8198" text-anchor="start">You compete in the existing game.</text><rect x="520" y="108" width="440" height="270" rx="14" fill="#DCE6FA" stroke="#A6C0EF" stroke-width="1.6" filter="url(#soft)"/><text x="544" y="144" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#2C66D8" text-anchor="start" letter-spacing="1.5">AS THE ENGINE — TIKTOK</text><circle cx="670" cy="258" r="62" fill="#2C66D8"/><text x="670" y="252" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="800" fill="#FFFFFF" text-anchor="middle">AI engine</text><text x="670" y="272" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11" font-weight="400" fill="#DCE6FA" text-anchor="middle">infers intent</text><rect x="770" y="200" width="150" height="52" rx="10" fill="#FFFFFF" stroke="#A6C0EF" stroke-width="1.5"/><text x="845" y="222" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12.5" font-weight="700" fill="#11263A" text-anchor="middle">Behavior graph</text><text x="845" y="240" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="10" font-weight="400" fill="#6B8198" text-anchor="middle">what you watch</text><rect x="770" y="266" width="150" height="52" rx="10" fill="#FFFFFF" stroke="#A6C0EF" stroke-width="1.5"/><text x="845" y="288" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12.5" font-weight="700" fill="#11263A" text-anchor="middle">60-sec cap</text><text x="845" y="306" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="10" font-weight="400" fill="#6B8198" text-anchor="middle">faster learning</text><line x1="732" y1="244" x2="768" y2="226" stroke="#2C66D8" stroke-width="1.6" marker-end="url(#arrow)" stroke-linecap="round"/><line x1="732" y1="272" x2="768" y2="292" stroke="#2C66D8" stroke-width="1.6" marker-end="url(#arrow)" stroke-linecap="round"/><text x="544" y="348" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#2A4258" text-anchor="start">AI is the core. It made the social graph</text><text x="544" y="366" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#2A4258" text-anchor="start">irrelevant — it changed the rules.</text><text x="40" y="416" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#11263A" text-anchor="start" font-style="italic">“With AI as the engine, the business wins by changing the rules of competition.” — Choudary</text>
+</svg><figcaption><b>Fig 5 — Tool vs. engine.</b> Instagram used AI to rank a feed its social graph still governed. TikTok made AI the core and rendered the social graph irrelevant. Same business; two architectures; one winner.</figcaption></figure>
+  </div>
+</section>
+
+<section id="evidence">
+  <div class="wrap reveal">
+    <div class="eyebrow">03 · The evidence</div>
+    <h2>The examples he uses</h2>
+    <p class="lede">Choudary argues by analogy and case, not assertion. These are the stories the book turns on — worth knowing because they're the lens he then points at every industry.</p>
+
+    <h3>The shipping container — the anchor</h3>
+    <p>In April 1956, Malcolm McLean loaded 58 standardised steel boxes onto a converted tanker and sent them from Newark to Houston. Everyone read it as <strong>port automation</strong>: faster cranes, bigger ships, fewer dockworkers. They missed it. The real unlock wasn't speed — it was <strong>coordination</strong>. Once every mode of transport agreed on the same box and a single contract, the chain became predictable, and a whole new economy got built on top of that reliability.</p>
+    <figure><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 470" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#5E7C97"/>
+</marker>
+<marker id="arrowS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#2C66D8"/>
+</marker>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+  <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#11263A" flood-opacity="0.10"/>
+</filter>
+</defs>
+<rect width="1000" height="470" fill="#FFFFFF"/>
+<text x="40" y="46" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#2C66D8" text-anchor="start" letter-spacing="1.5">HIS ANCHOR EXAMPLE · 1956, NEWARK</text><text x="40" y="80" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="29" font-weight="800" fill="#11263A" text-anchor="start">One steel box, three orders of effect</text><text x="40" y="104" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#6B8198" text-anchor="start">What looked like port automation reshuffled the entire world economy.</text><rect x="820" y="30" width="140" height="46" rx="3" fill="#DCE6FA" stroke="#2C66D8" stroke-width="2"/><line x1="834" y1="33" x2="834" y2="73" stroke="#2C66D8" stroke-width="1" stroke-linecap="round"/><line x1="848" y1="33" x2="848" y2="73" stroke="#2C66D8" stroke-width="1" stroke-linecap="round"/><line x1="862" y1="33" x2="862" y2="73" stroke="#2C66D8" stroke-width="1" stroke-linecap="round"/><line x1="876" y1="33" x2="876" y2="73" stroke="#2C66D8" stroke-width="1" stroke-linecap="round"/><line x1="890" y1="33" x2="890" y2="73" stroke="#2C66D8" stroke-width="1" stroke-linecap="round"/><line x1="904" y1="33" x2="904" y2="73" stroke="#2C66D8" stroke-width="1" stroke-linecap="round"/><line x1="918" y1="33" x2="918" y2="73" stroke="#2C66D8" stroke-width="1" stroke-linecap="round"/><line x1="932" y1="33" x2="932" y2="73" stroke="#2C66D8" stroke-width="1" stroke-linecap="round"/><line x1="946" y1="33" x2="946" y2="73" stroke="#2C66D8" stroke-width="1" stroke-linecap="round"/><line x1="70" y1="140" x2="70" y2="424" stroke="#9DB4C6" stroke-width="2" stroke-linecap="round"/><circle cx="70" cy="176" r="7" fill="#2C66D8"/><rect x="94" y="130" width="876" height="92" rx="12" fill="#FFFFFF" stroke="#CBD7E0" stroke-width="1.5"/><text x="114" y="164" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="26" font-weight="800" fill="#A6C0EF" text-anchor="start">01</text><text x="160" y="160" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="16" font-weight="800" fill="#11263A" text-anchor="start">THE PORT</text><text x="160" y="180" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#5E7C97" text-anchor="start">1956–1970</text><circle cx="548" cy="164" r="2.4" fill="#2C66D8"/><text x="560" y="160" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">Cranes replace</text><text x="560" y="175" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">dock gangs</text><circle cx="688" cy="164" r="2.4" fill="#2C66D8"/><text x="700" y="160" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">Cargo theft</text><text x="700" y="175" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">collapses</text><circle cx="828" cy="164" r="2.4" fill="#2C66D8"/><text x="840" y="160" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">Cost per ton</text><text x="840" y="175" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">↓ ~15×</text><text x="160" y="210" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="10.5" font-weight="600" fill="#6B8198" text-anchor="start" letter-spacing="0.5">First-order — the visible bit</text><circle cx="70" cy="282" r="7" fill="#2C66D8"/><rect x="130" y="236" width="840" height="92" rx="12" fill="#FFFFFF" stroke="#CBD7E0" stroke-width="1.5"/><text x="150" y="270" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="26" font-weight="800" fill="#A6C0EF" text-anchor="start">02</text><text x="196" y="266" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="16" font-weight="800" fill="#11263A" text-anchor="start">GLOBAL SUPPLY CHAINS</text><text x="196" y="286" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#5E7C97" text-anchor="start">1970–1990</text><circle cx="548" cy="270" r="2.4" fill="#2C66D8"/><text x="560" y="266" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">Garments stitched</text><text x="560" y="281" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">offshore</text><circle cx="688" cy="270" r="2.4" fill="#2C66D8"/><text x="700" y="266" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">Just-in-time replaces</text><text x="700" y="281" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">just-in-case</text><circle cx="828" cy="270" r="2.4" fill="#2C66D8"/><text x="840" y="266" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">Manufacturing</text><text x="840" y="281" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">unbundles</text><text x="196" y="316" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="10.5" font-weight="600" fill="#6B8198" text-anchor="start" letter-spacing="0.5">Second-order</text><circle cx="70" cy="388" r="7" fill="#2C66D8"/><rect x="166" y="342" width="804" height="92" rx="12" fill="#DCE6FA" stroke="#A6C0EF" stroke-width="1.5" filter="url(#soft)"/><text x="186" y="376" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="26" font-weight="800" fill="#A6C0EF" text-anchor="start">03</text><text x="232" y="372" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="16" font-weight="800" fill="#11263A" text-anchor="start">GLOBALISATION &amp; GEOPOLITICS</text><text x="232" y="392" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#5E7C97" text-anchor="start">1990–today</text><circle cx="548" cy="376" r="2.4" fill="#2C66D8"/><text x="560" y="372" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">Whole-chain jobs</text><text x="560" y="387" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">transformed</text><circle cx="688" cy="376" r="2.4" fill="#2C66D8"/><text x="700" y="372" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">Singapore: swamp</text><text x="700" y="387" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">→ wealth</text><circle cx="828" cy="376" r="2.4" fill="#2C66D8"/><text x="840" y="372" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">Lanes replace resources</text><text x="840" y="387" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">as power</text><text x="232" y="422" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="10.5" font-weight="600" fill="#6B8198" text-anchor="start" letter-spacing="0.5">Third-order — invisible in 1956</text><text x="70" y="458" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#6B8198" text-anchor="start" font-style="italic">The real unlock wasn’t speed — it was coordination: every mode of transport agreed on one box (ISO) and one contract.</text>
+</svg><figcaption><b>Fig 6 — One steel box, three orders of effect.</b> Singapore rose from a swamp to one of the wealthiest places on earth; control of shipping lanes replaced control of resources as a source of geopolitical power. None of it was visible in 1956. Choudary's wager: AI is the container, and we are standing in 1956.</figcaption></figure>
+
+    <h3>Kodak vs. Shutterstock — value migration</h3>
+    <p>Two firms, the same shock — the commoditisation of a scarcity-based business — and opposite outcomes. It is the cleanest illustration of &ldquo;follow the constraint.&rdquo;</p>
+    <div class="ex">
+      <div class="lab">Same shock · opposite response</div>
+      <h4>Who survived the collapse of image scarcity?</h4>
+      <div class="two">
+        <div class="lose">
+          <h5>Kodak — owned a scarcity</h5>
+          <p>Value lived in physical imaging: film, paper, chemistry. Digital killed film; the smartphone killed the print. The scarcity stopped being scarce, and value walked through layers Kodak didn't own — storage and search, then sharing and editing, then attention.</p>
+        </div>
+        <div class="win">
+          <h5>Shutterstock — owned a constraint</h5>
+          <p>Started as a licensable library, but followed the constraint customers actually felt: workflow, rights clearance, compliance, brand governance. When AI then commoditised image <em>generation</em>, Shutterstock was already sitting at the constraint that just got louder — governing infinite images.</p>
+        </div>
+      </div>
+      <div class="verdict"><b>The lesson:</b> Kodak owned a scarcity; Shutterstock owned a constraint. Scarcities erode — constraints shift but persist, and the firm positioned at the constraint inherits the value as it migrates.</div>
+    </div>
+
+    <h3>The knowledge job, unbundled</h3>
+    <p>Take any knowledge role — lawyer, analyst, engineer. It bundles drafting, looking things up, classifying, judging, owning a relationship and verifying. Slide AI's capability up and the tasks commoditise one by one. What's left — and what the role rebundles around — is a smaller set of durable constraints: <strong>human judgment</strong> (where the call is genuinely yours), <strong>AI orchestration</strong> (a role that didn't exist five years ago), and <strong>risk &amp; verification</strong> (because AI can't audit itself). Hold onto these three; they reappear, almost unchanged, when we get to software.</p>
+
+    <h3>TikTok vs. Instagram — engine beats tool</h3>
+    <p>Instagram, Facebook and YouTube used AI to rank feeds their <strong>social graph</strong> still governed — AI as a tool inside the old architecture. TikTok made AI the <strong>engine</strong>: the feed was driven by a <em>behaviour</em> graph inferred from what you watched, not who you followed. A deliberate constraint — the early sixty-second cap — tightened the feedback loop so the engine learned faster. Analysts thought the incumbents' network effects were unassailable. TikTok didn't beat the social graph; it made it irrelevant.</p>
+
+    <h3>And the quick hits</h3>
+    <div class="grid g4">
+      <div class="card"><div class="lab">Walmart</div><p>Built a <strong>barcode-native architecture</strong> — letting a standardised data interface reorganise everything from shelves to supply chain.</p></div>
+      <div class="card"><div class="lab">Shein</div><p>Drinks from the <strong>firehose of social media</strong>, scraping emerging trends off TikTok and Instagram to reinvent how apparel is designed and made.</p></div>
+      <div class="card"><div class="lab">Airbus</div><p>Constantly-evolving <strong>digital twins</strong> changed how it designs, builds and supports aircraft — the technology reorganises the work around it.</p></div>
+      <div class="card"><div class="lab">Music</div><p>Digital distribution <strong>unbundled</strong> songs from the album; curation and algorithms <strong>rebundled</strong> them into the playlist. The mechanic, in miniature.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="sdlc">
+  <div class="wrap reveal">
+    <div class="eyebrow teal">04 · The application</div>
+    <h2>Mapping the reshuffle to the SDLC</h2>
+    <p class="lede">Now the part we actually care about. If Choudary is right, the interesting question about AI and software delivery is not which tasks we can automate — it's which new system of building software we can coordinate.</p>
+
+    <div class="compare">
+      <div class="pane bad">
+        <div class="tag">The question to stop asking</div>
+        <h4>&ldquo;What can AI automate in our pipeline?&rdquo;</h4>
+        <p>Leads to faster typing, generated tests, autocompleted tickets — real, but first-order. It optimises the existing relay and quietly invests effort in the phase whose value is about to fall.</p>
+      </div>
+      <div class="pane good">
+        <div class="tag">The question to ask instead</div>
+        <h4>&ldquo;What new system of building software can AI coordinate?&rdquo;</h4>
+        <p>Leads to re-architecting how intent becomes a running system — and to repositioning people at the constraints that survive: specification, judgment, orchestration and verification.</p>
+      </div>
+    </div>
+
+    <h3>Every phase manages a constraint</h3>
+    <p>Run the lifecycle through Choudary's lens. Each phase exists not to <em>perform a task</em> but to <em>manage a constraint</em>. When AI collapses that constraint, the phase's old centre of gravity loses value and a new bottleneck appears — and value migrates toward it.</p>
+    <figure><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 470" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#5E7C97"/>
+</marker>
+<marker id="arrowS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#2C66D8"/>
+</marker>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+  <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#11263A" flood-opacity="0.10"/>
+</filter>
+</defs>
+<rect width="1040" height="470" fill="#FFFFFF"/>
+<text x="40" y="46" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#2C66D8" text-anchor="start" letter-spacing="1.5">THE BRIDGE · APPLYING IT TO SOFTWARE</text><text x="40" y="80" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="29" font-weight="800" fill="#11263A" text-anchor="start">Every SDLC phase manages a constraint</text><text x="40" y="104" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#6B8198" text-anchor="start">When AI collapses the old constraint, value moves to a new bottleneck — mostly upstream and into verification.</text><text x="40" y="167" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="15" font-weight="400" fill="#11263A" text-anchor="start"></text><rect x="40" y="128" width="151.66666666666666" height="70" rx="10" fill="#11263A"/><text x="115.83333333333333" y="159" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="12" font-weight="600" fill="#9DB4C6" text-anchor="middle">01</text><text x="115.83333333333333" y="181" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="800" fill="#FFFFFF" text-anchor="middle">Requirements</text><rect x="40" y="208" width="151.66666666666666" height="66" rx="9" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.3"/><text x="115.83333333333333" y="234" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="middle">cost of pinning</text><text x="115.83333333333333" y="250" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="middle">down intent</text><line x1="115.83333333333333" y1="276" x2="115.83333333333333" y2="288" stroke="#2C66D8" stroke-width="2" marker-end="url(#arrowS)"  stroke-linecap="round"/><rect x="40" y="292" width="151.66666666666666" height="66" rx="9" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.5"/><text x="115.83333333333333" y="317" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12" font-weight="700" fill="#11263A" text-anchor="middle">precise specs</text><text x="115.83333333333333" y="333" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12" font-weight="700" fill="#11263A" text-anchor="middle">&amp; evals</text><rect x="201.66666666666666" y="128" width="151.66666666666666" height="70" rx="10" fill="#11263A"/><text x="277.5" y="159" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="12" font-weight="600" fill="#9DB4C6" text-anchor="middle">02</text><text x="277.5" y="181" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="800" fill="#FFFFFF" text-anchor="middle">Design</text><rect x="201.66666666666666" y="208" width="151.66666666666666" height="66" rx="9" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.3"/><text x="277.5" y="234" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="middle">cost of exploring</text><text x="277.5" y="250" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="middle">options</text><line x1="277.5" y1="276" x2="277.5" y2="288" stroke="#2C66D8" stroke-width="2" marker-end="url(#arrowS)"  stroke-linecap="round"/><rect x="201.66666666666666" y="292" width="151.66666666666666" height="66" rx="9" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.5"/><text x="277.5" y="317" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12" font-weight="700" fill="#11263A" text-anchor="middle">judgment on</text><text x="277.5" y="333" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12" font-weight="700" fill="#11263A" text-anchor="middle">trade-offs</text><rect x="363.3333333333333" y="128" width="151.66666666666666" height="70" rx="10" fill="#11263A"/><text x="439.16666666666663" y="159" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="12" font-weight="600" fill="#9DB4C6" text-anchor="middle">03</text><text x="439.16666666666663" y="181" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="800" fill="#FFFFFF" text-anchor="middle">Build</text><rect x="363.3333333333333" y="208" width="151.66666666666666" height="66" rx="9" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.3"/><text x="439.16666666666663" y="234" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="middle">cost of producing</text><text x="439.16666666666663" y="250" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="middle">correct code</text><line x1="439.16666666666663" y1="276" x2="439.16666666666663" y2="288" stroke="#2C66D8" stroke-width="2" marker-end="url(#arrowS)"  stroke-linecap="round"/><rect x="363.3333333333333" y="292" width="151.66666666666666" height="66" rx="9" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.5"/><text x="439.16666666666663" y="317" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12" font-weight="700" fill="#11263A" text-anchor="middle">orchestration</text><text x="439.16666666666663" y="333" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12" font-weight="700" fill="#11263A" text-anchor="middle">&amp; integration</text><rect x="525" y="128" width="151.66666666666666" height="70" rx="10" fill="#11263A"/><text x="600.8333333333334" y="159" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="12" font-weight="600" fill="#9DB4C6" text-anchor="middle">04</text><text x="600.8333333333334" y="181" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="800" fill="#FFFFFF" text-anchor="middle">Test / QA</text><rect x="525" y="208" width="151.66666666666666" height="66" rx="9" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.3"/><text x="600.8333333333334" y="234" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="middle">cost of</text><text x="600.8333333333334" y="250" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="middle">verification labour</text><line x1="600.8333333333334" y1="276" x2="600.8333333333334" y2="288" stroke="#2C66D8" stroke-width="2" marker-end="url(#arrowS)"  stroke-linecap="round"/><rect x="525" y="292" width="151.66666666666666" height="66" rx="9" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.5"/><text x="600.8333333333334" y="317" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12" font-weight="700" fill="#11263A" text-anchor="middle">defining</text><text x="600.8333333333334" y="333" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12" font-weight="700" fill="#11263A" text-anchor="middle">“correct”</text><rect x="686.6666666666666" y="128" width="151.66666666666666" height="70" rx="10" fill="#11263A"/><text x="762.5" y="159" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="12" font-weight="600" fill="#9DB4C6" text-anchor="middle">05</text><text x="762.5" y="181" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="800" fill="#FFFFFF" text-anchor="middle">Release</text><rect x="686.6666666666666" y="208" width="151.66666666666666" height="66" rx="9" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.3"/><text x="762.5" y="234" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="middle">risk &amp; cost</text><text x="762.5" y="250" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="middle">of shipping</text><line x1="762.5" y1="276" x2="762.5" y2="288" stroke="#2C66D8" stroke-width="2" marker-end="url(#arrowS)"  stroke-linecap="round"/><rect x="686.6666666666666" y="292" width="151.66666666666666" height="66" rx="9" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.5"/><text x="762.5" y="317" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12" font-weight="700" fill="#11263A" text-anchor="middle">change safety</text><text x="762.5" y="333" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12" font-weight="700" fill="#11263A" text-anchor="middle">&amp; coordination</text><rect x="848.3333333333333" y="128" width="151.66666666666666" height="70" rx="10" fill="#11263A"/><text x="924.1666666666666" y="159" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="12" font-weight="600" fill="#9DB4C6" text-anchor="middle">06</text><text x="924.1666666666666" y="181" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="800" fill="#FFFFFF" text-anchor="middle">Operate</text><rect x="848.3333333333333" y="208" width="151.66666666666666" height="66" rx="9" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.3"/><text x="924.1666666666666" y="234" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="middle">cost of grasping</text><text x="924.1666666666666" y="250" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#6B8198" text-anchor="middle">the system</text><line x1="924.1666666666666" y1="276" x2="924.1666666666666" y2="288" stroke="#2C66D8" stroke-width="2" marker-end="url(#arrowS)"  stroke-linecap="round"/><rect x="848.3333333333333" y="292" width="151.66666666666666" height="66" rx="9" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.5"/><text x="924.1666666666666" y="317" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12" font-weight="700" fill="#11263A" text-anchor="middle">system coherence</text><text x="924.1666666666666" y="333" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="12" font-weight="700" fill="#11263A" text-anchor="middle">&amp; ownership</text><rect x="40" y="368" width="150" height="24" rx="12" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.4"/><text x="115" y="384" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="10" font-weight="600" fill="#6B8198" text-anchor="middle" letter-spacing="0.5">OLD CONSTRAINT</text><rect x="205" y="368" width="170" height="24" rx="12" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.4"/><text x="290" y="384" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="10" font-weight="600" fill="#1F4E96" text-anchor="middle" letter-spacing="0.5">NEW BOTTLENECK</text><line x1="500" y1="406" x2="80" y2="406" stroke="#2C66D8" stroke-width="2.5" marker-end="url(#arrowS)"  stroke-linecap="round"/><text x="520" y="411" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="12.5" font-weight="700" fill="#2C66D8" text-anchor="start">value migrates upstream (spec &amp; eval) and into verification</text>
+</svg><figcaption><b>Fig 7 — The SDLC, re-read as constraints.</b> The new bottlenecks cluster upstream (knowing what to build, precisely enough for a machine) and at verification (deciding what &ldquo;correct&rdquo; means and owning the risk).</figcaption></figure>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Phase</th><th>The constraint it managed</th><th>What AI collapses</th><th>The new bottleneck — where value goes</th><th>Who owns it</th></tr></thead>
+        <tbody>
+          <tr><td><span class="ph">Requirements &amp; discovery</span></td><td>Turning fuzzy intent into a precise, agreed spec</td><td>Drafting PRDs, summarising research, translating between stakeholders</td><td><span class="new">Knowing what to build — and encoding it as a spec and evals precise enough for an agent to build against</span></td><td>Product + spec/eval owner</td></tr>
+          <tr><td><span class="ph">Design &amp; architecture</span></td><td>Cost of exploring options; irreversibility of decisions</td><td>Generating variants, boilerplate, option sketches</td><td><span class="new">Judgment on trade-offs, interfaces and what is genuinely hard to reverse</span></td><td>Senior engineers / architects</td></tr>
+          <tr><td><span class="ph">Build / implementation</span></td><td>Scarcity and cost of producing correct code</td><td>Writing code, scaffolding, refactors, glue</td><td><span class="new">Orchestrating many generated components into a coherent whole; integration</span></td><td>Developers as orchestrators</td></tr>
+          <tr><td><span class="ph">Test &amp; QA</span></td><td>Cost of verification labour</td><td>Generating tests, fixtures, coverage</td><td><span class="new">Defining what &ldquo;correct&rdquo; means — the oracle problem — and what risk is acceptable</span></td><td>QA / verification owner</td></tr>
+          <tr><td><span class="ph">Release &amp; deploy</span></td><td>Risk and cost of shipping a change</td><td>Pipeline config, release notes, rollback scripts</td><td><span class="new">Coordinating safe change across systems as change-volume rises</span></td><td>Platform / SRE</td></tr>
+          <tr><td><span class="ph">Operate &amp; maintain</span></td><td>Cost of understanding and modifying a live system</td><td>Reading code, summarising incidents, drafting fixes</td><td><span class="new">Keeping the system coherent under a flood of cheap change; owning the truth</span></td><td>Owning teams</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Unbundling and rebundling our roles</h3>
+    <p>The linear SDLC is itself a bundle — it exists to manage hand-off cost and to manufacture consensus before anyone commits expensive work. PM hands to design, design to engineering, engineering to QA, QA to ops. Once AI drops both the cost of producing each artifact and the cost of translating between roles, that bundle comes apart. The roles rebundle around the three constraints that survived in every knowledge job: <strong>judgment, orchestration, verification</strong>.</p>
+    <figure><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 590" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#5E7C97"/>
+</marker>
+<marker id="arrowS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#2C66D8"/>
+</marker>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+  <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#11263A" flood-opacity="0.10"/>
+</filter>
+</defs>
+<rect width="1000" height="590" fill="#FFFFFF"/>
+<text x="40" y="46" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#2C66D8" text-anchor="start" letter-spacing="1.5">WHAT IT LOOKS LIKE IN PRACTICE</text><text x="40" y="80" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="28" font-weight="800" fill="#11263A" text-anchor="start">From a relay race to an orchestrated system</text><text x="40" y="116" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#6B8198" text-anchor="start" letter-spacing="1.5">BEFORE — LINEAR HAND-OFFS</text><rect x="40" y="130" width="150" height="50" rx="10" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.5"/><text x="115" y="160" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="700" fill="#2A4258" text-anchor="middle">PM</text><line x1="194" y1="155" x2="212" y2="155" stroke="#5E7C97" stroke-width="1.8" marker-end="url(#arrow)" stroke-linecap="round"/><rect x="216" y="130" width="150" height="50" rx="10" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.5"/><text x="291" y="160" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="700" fill="#2A4258" text-anchor="middle">Designer</text><line x1="370" y1="155" x2="388" y2="155" stroke="#5E7C97" stroke-width="1.8" marker-end="url(#arrow)" stroke-linecap="round"/><rect x="392" y="130" width="150" height="50" rx="10" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.5"/><text x="467" y="160" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="700" fill="#2A4258" text-anchor="middle">Dev</text><line x1="546" y1="155" x2="564" y2="155" stroke="#5E7C97" stroke-width="1.8" marker-end="url(#arrow)" stroke-linecap="round"/><rect x="568" y="130" width="150" height="50" rx="10" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.5"/><text x="643" y="160" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="700" fill="#2A4258" text-anchor="middle">QA</text><line x1="722" y1="155" x2="740" y2="155" stroke="#5E7C97" stroke-width="1.8" marker-end="url(#arrow)" stroke-linecap="round"/><rect x="744" y="130" width="150" height="50" rx="10" fill="#E9EEF3" stroke="#DCE4EB" stroke-width="1.5"/><text x="819" y="160" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="700" fill="#2A4258" text-anchor="middle">Ops</text><text x="40" y="204" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="400" fill="#6B8198" text-anchor="start">Sequential. Process exists to manage hand-off cost and to manufacture consensus before acting.</text><line x1="40" y1="222" x2="960" y2="222" stroke="#CBD7E0" stroke-width="1" stroke-linecap="round"/><text x="40" y="252" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="600" fill="#2C66D8" text-anchor="start" letter-spacing="1.5">AFTER — ORCHESTRATION AROUND NEW CONSTRAINTS</text><circle cx="500" cy="400" r="58" fill="#2C66D8" filter="url(#soft)"/><text x="500" y="394" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="16" font-weight="800" fill="#FFFFFF" text-anchor="middle">Orchestrator</text><text x="500" y="414" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="12" font-weight="400" fill="#DCE6FA" text-anchor="middle">(human)</text><line x1="438" y1="382" x2="332" y2="312" stroke="#5E7C97" stroke-width="1.5" stroke-dasharray="3 3" stroke-linecap="round"/><rect x="212" y="290" width="120" height="44" rx="9" fill="#FFFFFF" stroke="#9DB4C6" stroke-width="1.5"/><text x="272" y="310" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="13" font-weight="700" fill="#11263A" text-anchor="middle">spec → code</text><text x="272" y="327" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="9.5" font-weight="400" fill="#6B8198" text-anchor="middle">AI agent</text><line x1="438" y1="418" x2="302" y2="434" stroke="#5E7C97" stroke-width="1.5" stroke-dasharray="3 3" stroke-linecap="round"/><rect x="182" y="412" width="120" height="44" rx="9" fill="#FFFFFF" stroke="#9DB4C6" stroke-width="1.5"/><text x="242" y="432" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="13" font-weight="700" fill="#11263A" text-anchor="middle">tests</text><text x="242" y="449" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="9.5" font-weight="400" fill="#6B8198" text-anchor="middle">AI agent</text><line x1="562" y1="382" x2="668" y2="312" stroke="#5E7C97" stroke-width="1.5" stroke-dasharray="3 3" stroke-linecap="round"/><rect x="668" y="290" width="120" height="44" rx="9" fill="#FFFFFF" stroke="#9DB4C6" stroke-width="1.5"/><text x="728" y="310" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="13" font-weight="700" fill="#11263A" text-anchor="middle">docs</text><text x="728" y="327" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="9.5" font-weight="400" fill="#6B8198" text-anchor="middle">AI agent</text><line x1="562" y1="418" x2="698" y2="434" stroke="#5E7C97" stroke-width="1.5" stroke-dasharray="3 3" stroke-linecap="round"/><rect x="698" y="412" width="120" height="44" rx="9" fill="#FFFFFF" stroke="#9DB4C6" stroke-width="1.5"/><text x="758" y="432" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="13" font-weight="700" fill="#11263A" text-anchor="middle">review</text><text x="758" y="449" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="9.5" font-weight="400" fill="#6B8198" text-anchor="middle">AI agent</text><rect x="40" y="478" width="290" height="60" rx="10" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.6"/><text x="58" y="505" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="800" fill="#11263A" text-anchor="start">Spec &amp; eval owner</text><text x="58" y="526" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">upstream — defines the target</text><rect x="345" y="478" width="290" height="60" rx="10" fill="#DCE6FA" stroke="#A6C0EF" stroke-width="1.6"/><text x="363" y="505" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="800" fill="#11263A" text-anchor="start">AI orchestration</text><text x="363" y="526" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">the new center of gravity</text><rect x="650" y="478" width="290" height="60" rx="10" fill="#DEE7F4" stroke="#AAC0DE" stroke-width="1.6"/><text x="668" y="505" font-family="Archivo, 'DejaVu Sans Condensed', 'Arial Narrow', sans-serif" font-size="15" font-weight="800" fill="#11263A" text-anchor="start">Risk &amp; verification</text><text x="668" y="526" font-family="'IBM Plex Mono', 'DejaVu Sans Mono', monospace" font-size="11.5" font-weight="400" fill="#2A4258" text-anchor="start">downstream — owns the truth</text><text x="40" y="562" font-family="Archivo, 'DejaVu Sans', Arial, sans-serif" font-size="13" font-weight="500" fill="#2A4258" text-anchor="start">Parallel exploration replaces the relay. Consensus forms after the work, not before it.</text>
+</svg><figcaption><b>Fig 8 — From a relay race to an orchestrated system.</b> The pipeline stops being a sequence of hand-offs and becomes a human orchestrating parallel agent work, anchored by three durable roles: who defines the target, who runs the orchestration, and who owns the truth about whether it's right.</figcaption></figure>
+
+    <h3>Coordination without consensus — inside delivery</h3>
+    <p>The most underrated payoff is internal. Software organisations are a pile of silos that talk past each other: product specs, design files, tickets, code, logs, support conversations, customer calls. Historically we spent enormous effort — meetings, rituals, documents — translating between them to reach enough agreement to act. AI drops that translation cost toward zero. A support thread can update a backlog; a failing log can draft a fix; a spec can become a test. The win isn't a faster standup — it's domains that never coordinated now doing so without first agreeing on one tool or format.</p>
+
+    <h3>AI as the engine of the software org</h3>
+    <p>This is the trap to avoid. Treating AI as a tool means a faster IDE and generated boilerplate bolted onto today's process — the &ldquo;tool-integration trap.&rdquo; Treating it as the engine means redesigning the lifecycle around it: the spec and its evals become the durable source of truth, generation is cheap and disposable, and the human work concentrates at the constraints. The first approach makes you quicker at shipping the way you ship now. The second changes what your delivery system <em>is</em>.</p>
+
+    <h3>Where value lands</h3>
+    <p>Choudary's prediction for value chains — that value moves toward the start of the chain and toward whoever governs the new abundance — maps cleanly onto software. As writing code commoditises, advantage concentrates in three places:</p>
+    <ul class="clean teal">
+      <li><b>Upstream:</b> the people who can state the problem precisely and encode it as a spec and an evaluation an agent can be measured against. The spec becomes the asset; the code becomes a build artifact.</li>
+      <li><b>At verification:</b> whoever can decide what &ldquo;correct&rdquo; means and stand behind it. When generation is infinite, judging and governing output is the job — the Shutterstock position.</li>
+      <li><b>At orchestration:</b> whoever can compose many cheap, generated components into a coherent, reliable system — the new centre of gravity that didn't exist as a role a few years ago.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="caveats">
+  <div class="wrap reveal">
+    <div class="eyebrow muted">05 · Where the mapping strains</div>
+    <h2>Honest limits</h2>
+    <p class="lede">Choudary's framework is value-chain economics, not an engineering law. It's a powerful lens on where work and value relocate — and weaker as a claim that the hard parts of software simply dissolve.</p>
+    <div class="note">
+      <div class="lab">Read this before you over-rotate</div>
+      <p><strong>Some constraints don't collapse.</strong> Distributed-systems complexity, security and safety, regulatory accountability, and the verification oracle problem are real engineering constraints. AI shifts who works on them and how, but it doesn't make them cheap. The model says value <em>migrates</em> to these constraints — not that they disappear.</p>
+      <p><strong>Cheaper change is not lower risk.</strong> AI lowers the cost of producing a change; it does not automatically lower the systemic risk of shipping one. If anything, a flood of cheap change makes coordination and verification <em>more</em> load-bearing, not less.</p>
+      <p><strong>The analogies persuade; they don't prove.</strong> Containers, Kodak and TikTok are vivid and directionally useful, but they're selected cases. Treat the framework as a way to ask better questions about our own system, not as a forecast to execute literally.</p>
+    </div>
+  </div>
+</section>
+
+<section id="playbook">
+  <div class="wrap reveal">
+    <div class="eyebrow teal">06 · The playbook</div>
+    <h2>What to do about it</h2>
+    <p class="lede">Concrete moves that follow from the framework — chosen to reposition us at the constraints that survive, rather than to automate the tasks that won't matter.</p>
+    <ol class="play">
+      <li><h4>Map your constraints before you reskill</h4><p>For each team, name the constraint the work actually resolves — scarcity, risk, or coordination. &ldquo;Skills are only valuable in relation to the constraint they resolve.&rdquo; Chase new tooling without this and you risk getting very good at something that no longer matters.</p></li>
+      <li><h4>Make specs and evals the source of truth</h4><p>Invest where value is moving: precise specifications and the evaluations that define &ldquo;correct.&rdquo; Treat the spec as the durable asset and generated code as a disposable build artifact. This is the upstream position.</p></li>
+      <li><h4>Build a verification layer, and name who owns it</h4><p>When generation is cheap and infinite, judging output is the job. Stand up the harness — automated checks, evals, human review at the points that carry risk — and give it a clear owner. That's the Shutterstock move.</p></li>
+      <li><h4>Create the orchestration role explicitly</h4><p>Someone has to compose parallel agent work into a coherent system. Don't leave it implicit inside &ldquo;developer&rdquo; — recognise orchestration as the new centre of gravity and staff it deliberately.</p></li>
+      <li><h4>Pick one workflow and use AI as the engine, end-to-end</h4><p>Resist bolting AI onto every step as a tool. Choose a single delivery flow and redesign it around AI from intent to running system. Learn what changes when the system reorganises — then spread it.</p></li>
+      <li><h4>Exploit coordination without consensus</h4><p>Find two silos that have talked past each other for years — support and engineering, design and QA — and let AI translate between them without a standardisation project. The payoff is in the seams, not the steps.</p></li>
+      <li><h4>Measure system outcomes, not task speed</h4><p>&ldquo;Lines per hour&rdquo; or &ldquo;tickets closed&rdquo; is the intelligence distraction in metric form. Track cycle time from intent to verified value, escaped-defect and rework rates, and system coherence. Reward the reshuffle, not the typing.</p></li>
+    </ol>
+    <blockquote><p>&ldquo;You don't need an AI strategy. You need a strategy for the conditions AI creates.&rdquo;</p><cite>— Sangeet Paul Choudary, Reshuffle</cite></blockquote>
+  </div>
+</section>
+
+<footer id="sources">
+  <div class="wrap">
+    <div class="eyebrow">Sources &amp; further reading</div>
+    <h3>Go to the originals</h3>
+    <p>Everything here is a synthesis of Choudary's published work; the framing, examples and quoted lines are his.</p>
+    <p class="src">
+      &#9632;&nbsp; Choudary, S. P. (2025). <a href="https://www.amazon.com/Reshuffle-wins-restacks-knowledge-economy-ebook/dp/B0DTKW6NQV"><em>Reshuffle: Who Wins When AI Restacks the Knowledge Economy</em></a><br>
+      &#9632;&nbsp; <a href="https://reshufflebook.com/">reshufflebook.com</a> — the interactive companion (source of the container, Kodak/Shutterstock and TikTok walk-throughs)<br>
+      &#9632;&nbsp; <a href="https://platforms.substack.com/">platforms.substack.com</a> — Choudary's ongoing writing<br>
+      &#9632;&nbsp; Earlier work: <em>Platform Revolution</em> (2016) and <em>Platform Scale</em>
+    </p>
+    <p class="src" style="margin-top:20px;">
+      <b style="color:#fff;">Take it with you</b><br>
+      &#9632;&nbsp; <a href="downloads/Reshuffle-applied-to-the-SDLC.pptx">Slide deck (.pptx)</a> — 20 slides with speaker notes<br>
+      &#9632;&nbsp; <a href="downloads/Reshuffle-applied-to-the-SDLC.docx">Whitepaper (.docx)</a> — the full written report
+    </p>
+    <p class="fine">Prepared as an internal explainer. Independent synthesis for discussion — not affiliated with or endorsed by the author. Concepts and quotations &copy; Sangeet Paul Choudary; diagrams are our own interpretation of his frameworks.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var prog=document.getElementById('progress');
+  function onScroll(){
+    var h=document.documentElement, b=document.body;
+    var st=h.scrollTop||b.scrollTop;
+    var sh=(h.scrollHeight||b.scrollHeight)-h.clientHeight;
+    prog.style.width=(sh>0?(st/sh*100):0)+'%';
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:0.12});
+  document.querySelectorAll('.reveal, .reveal-blk').forEach(function(el){
+    if(reduce){ el.classList.add('in'); } else { io.observe(el); }
+  });
+
+  // nav active state
+  var links=[].slice.call(document.querySelectorAll('.nav-links a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  function onActive(){
+    var pos=(window.scrollY||window.pageYOffset)+140; var idx=0;
+    secs.forEach(function(s,i){ if(s && s.offsetTop<=pos) idx=i; });
+    links.forEach(function(a,i){ a.classList.toggle('active', i===idx); });
+  }
+  window.addEventListener('scroll',onActive,{passive:true}); onActive();
+
+  // day / night toggle
+  var tbtn=document.getElementById('themeToggle');
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme',t);
+    try{ localStorage.setItem('theme',t); }catch(e){}
+    if(tbtn){ tbtn.setAttribute('aria-pressed', t==='dark'); var l=tbtn.querySelector('.tt-label'); if(l) l.textContent = (t==='dark'?'Night':'Day'); }
+  }
+  if(tbtn){
+    applyTheme(document.documentElement.getAttribute('data-theme')||'light');
+    tbtn.addEventListener('click',function(){
+      var cur=document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light';
+      applyTheme(cur==='dark'?'light':'dark');
+    });
+  }
+})();
+</script>
+</body>
+</html>
