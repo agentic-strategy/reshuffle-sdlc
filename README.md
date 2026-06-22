@@ -46,7 +46,6 @@ No build step, no dependencies, no runtime—just open `index.html` in a browser
 
 ## Attribution
 
-**Book:** *Reshuffle: Managing Uncertainty in the Age of AI* (2024) by Sangeet Paul Choudary  
-**Author's work:** [gleec.co](https://gleec.co), [sangeet.su](https://sangeet.su)
+**Book:** *Reshuffle: Managing Uncertainty in the Age of AI* (2024) by Sangeet Paul Choudary
 
 **This site:** Independent synthesis and application to the SDLC — not affiliated with or endorsed by the author. Concepts and frameworks © Sangeet Paul Choudary. Diagrams and SDLC interpretation are original.
