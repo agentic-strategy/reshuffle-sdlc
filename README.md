@@ -1,17 +1,14 @@
 # The System, Not the Task — Reshuffle, applied to the SDLC
 
-An internal explainer of Sangeet Paul Choudary's *Reshuffle* (AI as coordination, not
-automation) mapped onto the software development lifecycle. Ships as a single static
-website plus a downloadable slide deck and whitepaper.
+An interactive explainer of Sangeet Paul Choudary's *Reshuffle* (AI as coordination, not
+automation) mapped onto the software development lifecycle.
 
-**Live site:** `https://<your-username>.github.io/<repo-name>/`
+**Live site:** `https://agentic-strategy.github.io/reshuffle-sdlc/`
 
 ## Contents
 | Path | What it is |
 |------|------------|
 | `index.html` | The website (self-contained — all CSS, JS and diagrams are inline). Light + dark themes. |
-| `downloads/Reshuffle-applied-to-the-SDLC.pptx` | 20-slide deck with speaker notes. |
-| `downloads/Reshuffle-applied-to-the-SDLC.docx` | The full written whitepaper. |
 | `.nojekyll` | Tells GitHub Pages to serve files as-is (no Jekyll processing). |
 
 ## Deploy on GitHub Pages (simplest)
