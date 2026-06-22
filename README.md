@@ -1,54 +1,52 @@
 # The System, Not the Task — Reshuffle, applied to the SDLC
 
-An interactive explainer of Sangeet Paul Choudary's *Reshuffle* (AI as coordination, not
-automation) mapped onto the software development lifecycle.
+An interactive explainer mapping Sangeet Paul Choudary's *Reshuffle* framework onto the software development lifecycle.
 
-**Live site:** `https://agentic-strategy.github.io/reshuffle-sdlc/`
+**Read it live:** [agentic-strategy.github.io/reshuffle-sdlc](https://agentic-strategy.github.io/reshuffle-sdlc/)
+
+## About Reshuffle
+
+*Reshuffle: Managing Uncertainty in the Age of AI* (2024) argues that AI's impact on work is fundamentally about **coordination**, not automation.
+
+**Sangeet Paul Choudary** is an economist and platform strategist who founded Gleec and co-authored *Platform Revolution*. In *Reshuffle*, he challenges the automation narrative: rather than replacing workers, AI reshuffles how work is coordinated — who makes decisions, how information flows, how tasks are bundled and delegated.
+
+### Core thesis
+- **Not automation**: Tasks don't disappear; they're recombined
+- **Coordination shifts**: AI changes *how* work gets done, *who* does it, and *when*
+- **System-level**: The impact ripples across roles, workflows, and organizational structures
+- **Uncertainty is the constant**: We're reshuffling while the game is still in play
+
+## How it applies to the SDLC
+
+Software development is an especially rich domain for this framework. The SDLC touches every function (product, engineering, QA, security, ops) and every decision-making layer. When AI enters, it doesn't automate development—it *reshuffles* it:
+
+- **Who writes code?** Developers + AI assistants, but the bundle shifts daily
+- **Who reviews?** Reviewers get new signals; decisions get reshuffled
+- **How are priorities set?** Product planning gains new inputs
+- **Who owns quality?** QA transforms from gatekeeper to orchestrator
+- **How do teams coordinate?** The async/sync balance resets
+
+This site unpacks these shifts—not as predictions, but as a framework for thinking clearly about what's actually changing in your development process.
 
 ## Contents
 | Path | What it is |
 |------|------------|
-| `index.html` | The website (self-contained — all CSS, JS and diagrams are inline). Light + dark themes. |
+| `index.html` | Interactive explainer with light + dark themes. Self-contained—all CSS, JS, and diagrams are inline. |
 | `.nojekyll` | Tells GitHub Pages to serve files as-is (no Jekyll processing). |
 
-## Deploy on GitHub Pages (simplest)
+## For developers: Fork or adapt this
 
-1. Create a new repository on GitHub (Public).
-2. Push these files to the `main` branch (see commands below), **or** use
-   GitHub's *Add file → Upload files* to drag the whole folder in.
-3. In the repo, go to **Settings → Pages**.
-4. Under **Build and deployment → Source**, choose **Deploy from a branch**.
-5. Set **Branch** to `main` and the folder to **`/ (root)`**, then **Save**.
-6. Wait ~1 minute, refresh, and your site is live at the URL shown on that page.
+This site is a static HTML + CSS + JS export. You can:
+- **Fork the repo** and customize for your context
+- **Add your own diagrams** by editing the HTML
+- **Deploy anywhere**: GitHub Pages (as-is), Netlify, Vercel, or your own host
+- **Share freely**: The framework is public, the interpretations are open to critique
 
-### Push from your machine
+No build step, no dependencies, no runtime—just open `index.html` in a browser to test locally.
 
-```bash
-# from inside this folder
-git init
-git add .
-git commit -m "Reshuffle → SDLC explainer"
-git branch -M main
-git remote add origin https://github.com/<your-username>/<repo-name>.git
-git push -u origin main
-```
+## Attribution
 
-Or with the GitHub CLI (creates the repo and pushes in one step):
+**Book:** *Reshuffle: Managing Uncertainty in the Age of AI* (2024) by Sangeet Paul Choudary  
+**Author's work:** [gleec.co](https://gleec.co), [sangeet.su](https://sangeet.su)
 
-```bash
-gh repo create <repo-name> --public --source=. --remote=origin --push
-```
-
-## Custom domain (optional)
-In **Settings → Pages → Custom domain**, enter your domain and Save. Add a `CNAME`
-record at your DNS provider pointing to `<your-username>.github.io` (or four A records
-for an apex domain). GitHub provisions HTTPS automatically once DNS resolves.
-
-## Don't want to use Git?
-Drag this folder onto **Netlify Drop** (app.netlify.com/drop), **Cloudflare Pages**, or
-**Vercel** — each gives you a live HTTPS URL in seconds with no command line.
-
----
-Independent synthesis for discussion — not affiliated with or endorsed by the author.
-Concepts & quotations © Sangeet Paul Choudary; diagrams are an original interpretation
-of his frameworks.
+**This site:** Independent synthesis and application to the SDLC — not affiliated with or endorsed by the author. Concepts and frameworks © Sangeet Paul Choudary. Diagrams and SDLC interpretation are original.
