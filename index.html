@@ -217,16 +217,53 @@
     <div class="code"><span>FIG_000</span><span>Reshuffle v1.0</span><span>2026</span><span>Internal field note</span></div>
     <h1>The system,<br>not the <span class="em">task</span>.</h1>
     <p class="sub">Sangeet Paul Choudary's <em>Reshuffle</em> argues that AI's real economic impact is not automation — it's coordination. This is his argument, the examples he uses to make it, and what it means for how we build software.</p>
-    <div class="strip reveal-blk">
-      <div class="strip-lab">Take a lawyer. A job is a bundle of tasks — AI unbundles them, and the role rebundles around what stays scarce</div>
-      <div class="strip-row">
-        <span class="blk mut">Draft&nbsp;briefs</span>
-        <span class="blk mut">Research&nbsp;precedent</span>
-        <span class="blk mut">Classify&nbsp;issues</span>
-        <span class="arrow">&rarr;</span>
-        <span class="blk j2">Judge&nbsp;merits</span>
-        <span class="blk j2">Own&nbsp;the&nbsp;relationship</span>
-        <span class="blk j2">Risk&nbsp;&amp;&nbsp;sign-off</span>
+    <div class="strip">
+      <div class="strip-lab">The mechanic: a job unbundles, then rebundles around new constraints</div>
+      <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:4px;">
+
+        <!-- BEFORE: one bundled job -->
+        <div style="border:2px solid var(--line); border-radius:10px; padding:16px 18px; background:var(--surface-2); min-width:160px;">
+          <div style="font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:8px;">One job, bundled</div>
+          <div style="font-family:var(--display); font-weight:800; font-size:15px; color:var(--ink); margin-bottom:10px;">Lawyer</div>
+          <div style="display:flex; flex-direction:column; gap:5px;">
+            <span class="blk mut" style="opacity:1;transform:none;font-size:12px;padding:7px 10px;">Draft briefs</span>
+            <span class="blk mut" style="opacity:1;transform:none;font-size:12px;padding:7px 10px;">Research precedent</span>
+            <span class="blk mut" style="opacity:1;transform:none;font-size:12px;padding:7px 10px;">Classify issues</span>
+            <span class="blk j2" style="opacity:1;transform:none;font-size:12px;padding:7px 10px;">Judge merits</span>
+            <span class="blk j2" style="opacity:1;transform:none;font-size:12px;padding:7px 10px;">Own the relationship</span>
+            <span class="blk j2" style="opacity:1;transform:none;font-size:12px;padding:7px 10px;">Risk &amp; sign-off</span>
+          </div>
+        </div>
+
+        <!-- ARROW -->
+        <div style="text-align:center; flex:none;">
+          <div style="font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:3px;">AI unbundles</div>
+          <div style="color:var(--accent); font-weight:700; font-size:22px; line-height:1;">&rarr;</div>
+          <div style="font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-top:3px;">then rebundles</div>
+        </div>
+
+        <!-- AFTER: two new bundles -->
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start;">
+
+          <div style="border:1.5px solid var(--line); border-radius:10px; padding:16px 18px; background:var(--surface-2); min-width:140px;">
+            <div style="font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:10px;">AI agent</div>
+            <div style="display:flex; flex-direction:column; gap:5px;">
+              <span class="blk mut" style="opacity:1;transform:none;font-size:12px;padding:7px 10px;">Draft briefs</span>
+              <span class="blk mut" style="opacity:1;transform:none;font-size:12px;padding:7px 10px;">Research precedent</span>
+              <span class="blk mut" style="opacity:1;transform:none;font-size:12px;padding:7px 10px;">Classify issues</span>
+            </div>
+          </div>
+
+          <div style="border:1.5px solid var(--teal-mid); border-radius:10px; padding:16px 18px; background:var(--teal-soft); min-width:140px;">
+            <div style="font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--teal); margin-bottom:10px;">New human role</div>
+            <div style="display:flex; flex-direction:column; gap:5px;">
+              <span class="blk j2" style="opacity:1;transform:none;font-size:12px;padding:7px 10px;">Judge merits</span>
+              <span class="blk j2" style="opacity:1;transform:none;font-size:12px;padding:7px 10px;">Own the relationship</span>
+              <span class="blk j2" style="opacity:1;transform:none;font-size:12px;padding:7px 10px;">Risk &amp; sign-off</span>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
     <p class="meta" style="margin-top:22px;">A synthesis of <em>Reshuffle: Who Wins When AI Restacks the Knowledge Economy</em> (2025) by Sangeet Paul Choudary, mapped onto the software development lifecycle.</p>
